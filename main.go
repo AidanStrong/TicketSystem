@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux" // import package using "go get github.com/gorilla/mux"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,8 +12,8 @@ import (
 
 // Ticket - Our struct for all tickets, to be replaced with DB access
 type Ticket struct {
-	Id       int    `json:"Id"`
-	Title    string `json:"Title"`
+	Id       int    `json:"id"`
+	Title    string `json:"title"`
 	Desc     string `json:"desc"`
 	Priority int    `json:"priority"`
 }
@@ -49,12 +50,62 @@ func getTicket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func createTicket(w http.ResponseWriter, r *http.Request) {
+	reqBody, _ := ioutil.ReadAll(r.Body) // get the body of our POST request
+
+	var ticket Ticket
+	json.Unmarshal(reqBody, &ticket) // unmarshal json into ticket struct
+	Tickets = append(Tickets, ticket)
+
+	json.NewEncoder(w).Encode(ticket)
+}
+
+func deleteTicket(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"]) // accessed using tuple and converted to int
+	if err != nil {
+		panic(err)
+	}
+
+	for index, ticket := range Tickets {
+		if ticket.Id == id {
+			Tickets = append(Tickets[:index], Tickets[index+1:]...)
+		}
+	}
+
+	json.NewEncoder(w).Encode(Tickets)
+}
+
+func updateTicket(w http.ResponseWriter, r *http.Request) {
+	reqBody, _ := ioutil.ReadAll(r.Body) // get the body of our POST request
+
+	var updatedTicket Ticket
+	json.Unmarshal(reqBody, &updatedTicket)
+
+	for index, ticket := range Tickets {
+		if ticket.Id == updatedTicket.Id {
+			ticket.Title = updatedTicket.Title
+			ticket.Desc = updatedTicket.Desc
+			ticket.Priority = updatedTicket.Priority
+
+			Tickets = append(Tickets[:index], ticket)
+			json.NewEncoder(w).Encode(ticket)
+		}
+	}
+}
+
 func handleRequests() {
 	// creates a new instance of a mux router
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", homePage)
 	router.HandleFunc("/tickets", allTickets)
+
+	// NOTE: Ordering is important here! This has to be defined before
+	// the other `/article` endpoint.
+	router.HandleFunc("/ticket", createTicket).Methods("POST")
+	router.HandleFunc("/ticket/{id}", deleteTicket).Methods("DELETE")
+	router.HandleFunc("/ticket/{id}", updateTicket).Methods("PATCH")
 	router.HandleFunc("/ticket/{id}", getTicket)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
