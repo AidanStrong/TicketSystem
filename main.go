@@ -21,13 +21,13 @@ type Ticket struct {
 var Tickets []Ticket
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the HomePage!")
 	fmt.Println("Endpoint Hit: homePage")
+	fmt.Fprintf(w, "Welcome to the HomePage!")
 }
 
 func allTickets(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: GET /tickets")
 	json.NewEncoder(w).Encode(Tickets)
-	fmt.Println("Endpoint Hit: tickets")
 }
 
 func getTicket(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +36,7 @@ func getTicket(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Endpoint Hit: GET /ticket/%d \n", id)
 
 	found := false
 	for _, ticket := range Tickets {
@@ -51,6 +52,7 @@ func getTicket(w http.ResponseWriter, r *http.Request) {
 }
 
 func createTicket(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Endpoint Hit: POST /ticket \n")
 	reqBody, _ := ioutil.ReadAll(r.Body) // get the body of our POST request
 
 	var ticket Ticket
@@ -66,6 +68,7 @@ func deleteTicket(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Endpoint Hit: DELETE /ticket/%d \n", id)
 
 	for index, ticket := range Tickets {
 		if ticket.Id == id {
@@ -81,6 +84,7 @@ func updateTicket(w http.ResponseWriter, r *http.Request) {
 
 	var updatedTicket Ticket
 	json.Unmarshal(reqBody, &updatedTicket)
+	fmt.Printf("Endpoint Hit: PATCH /ticket/%d \n", updatedTicket.Id)
 
 	for index, ticket := range Tickets {
 		if ticket.Id == updatedTicket.Id {
@@ -122,6 +126,5 @@ func main() {
 	}
 
 	log.Println("Server started on port :8080...")
-	log.Println("change")
 	handleRequests()
 }
