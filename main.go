@@ -1,26 +1,15 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/AidanStrong/TicketSystem/db"
 	"github.com/gorilla/mux" // import package using "go get github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
-	"github.com/AidanStrong/TicketSystem/db"
-)
-
-// database connection
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "postgres"
-	dbname   = "ticketdb"
 )
 
 // Ticket - Our struct for all tickets, to be replaced with DB access
@@ -129,104 +118,18 @@ func handleRequests() {
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-func createTables(db *sql.DB) {
-	var sql string
-
-	// drop tables
-	sql = `DROP TABLE IF EXISTS tickets`
-	_, err := db.Exec(sql)
-	if err != nil {
-		panic(err)
-	}
-
-	sql = `DROP TABLE IF EXISTS users`
-	_, err = db.Exec(sql)
-	if err != nil {
-		panic(err)
-	}
-
-	// create user table
-	sql = `
-	 	CREATE TABLE users (
-	 	id SERIAL PRIMARY KEY,
-	 	first_name TEXT,
-	 	last_name TEXT,
-		email TEXT UNIQUE NOT NULL)`
-	_, err = db.Exec(sql)
-	if err != nil {
-		panic(err)
-	}
-
-	// populate user table
-	sql = `
-	 	INSERT INTO users (first_name, last_name, email)
-	 	VALUES ('Aidan', 'Strong', 'aidans@email.com'),
-			   ('Alex', 'Smith', 'alecs@email.com'),
-			   ('John', 'Smith', 'johns@email.com')`
-	_, err = db.Exec(sql)
-	if err != nil {
-		panic(err)
-	}
-
-	// create ticket table
-	sql = `
-	 	CREATE TABLE tickets (
-	 	id				SERIAL PRIMARY KEY,
-	 	title 			TEXT,
-	 	description		TEXT,
-	 	priority		NUMERIC,
-	 	date_created	TIMESTAMP DEFAULT Now(),
-	 	status 			TEXT,
-	 	author INTEGER,
-	 	FOREIGN KEY(author) REFERENCES users(id)
-	 	)`
-	_, err = db.Exec(sql)
-	if err != nil {
-		panic(err)
-	}
-
-	// populate ticket table
-	sql = `INSERT INTO tickets (title, description, priority, status, author)
-		VALUES ('Requesting VPN access', 'Working from home, need VPN access please.', 2, 'Not assigned', 1),
-			   ('Increase database storage size', 'I am on the dev team and we need the prod database storage to be increased by 10GB to 110GB.', 3, 'Not assigned', 1)
-				`
-	_, err = db.Exec(sql)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Print("sql done")
-}
-
 /*
 	Created using tutorial: https://tutorialedge.net/golang/creating-restful-api-with-golang/
 */
 func main() {
 	//data base connection
 	log.Println("Connecting to database...")
-	db.SetDbConn()
-	// Get the value of an Environment Variable
-	fmt.Println(os.Getenv("HOST"))
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-	log.Println("Successfully connected to database!")
+	myDb := db.SetDbConn()
 
 	// create tables
 	log.Println("Creating tables")
-	createTables(db)
-
+	db.CreateTables(myDb)
+	defer myDb.Close()
 	// handle requests
 	log.Println("Server started on port :8080...")
 	handleRequests()
