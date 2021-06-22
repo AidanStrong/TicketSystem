@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"ticketsystem/db/conn"
+	"github.com/AidanStrong/TicketSystem/db"
 )
 
 // database connection
@@ -204,7 +204,7 @@ func createTables(db *sql.DB) {
 func main() {
 	//data base connection
 	log.Println("Connecting to database...")
-	conn.setDbConn()
+	db.SetDbConn()
 	// Get the value of an Environment Variable
 	fmt.Println(os.Getenv("HOST"))
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+

@@ -2,7 +2,7 @@ package db
 
 import "os"
 
-func setDbConn() {
+func SetDbConn() {
 	// Set Environment Variables
 	os.Setenv("HOST", "localhost")
 	os.Setenv("PORT", "5432")
