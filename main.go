@@ -9,7 +9,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"ticketsystem/db/conn"
 )
 
 // database connection
@@ -17,7 +19,7 @@ const (
 	host     = "localhost"
 	port     = 5432
 	user     = "postgres"
-	password = "postGres!"
+	password = "postgres"
 	dbname   = "ticketdb"
 )
 
@@ -200,14 +202,11 @@ func createTables(db *sql.DB) {
 	Created using tutorial: https://tutorialedge.net/golang/creating-restful-api-with-golang/
 */
 func main() {
-	// Test Data
-	Tickets = []Ticket{
-		Ticket{Id: 1, Title: "Hello", Desc: "Ticket Description", Priority: 1},
-		Ticket{Id: 2, Title: "Hello 2", Desc: "Ticket Description", Priority: 2},
-	}
-
 	//data base connection
 	log.Println("Connecting to database...")
+	conn.setDbConn()
+	// Get the value of an Environment Variable
+	fmt.Println(os.Getenv("HOST"))
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
@@ -231,7 +230,5 @@ func main() {
 	// handle requests
 	log.Println("Server started on port :8080...")
 	handleRequests()
-
-	// CHANGED FILE FROM NEW BRANCHdfdsafdsa
 
 }
