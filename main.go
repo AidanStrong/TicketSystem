@@ -30,7 +30,9 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 func allTickets(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: GET /tickets")
-	json.NewEncoder(w).Encode(Tickets)
+	conn := db.SetDbConn()
+	tickets := db.GetAllTickets(conn)
+	json.NewEncoder(w).Encode(tickets)
 }
 
 func getTicket(w http.ResponseWriter, r *http.Request) {

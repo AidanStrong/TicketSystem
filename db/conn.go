@@ -6,20 +6,8 @@ import (
 	"log"
 )
 
+// capital letter at start means public visibility
 func SetDbConn() *sql.DB {
-	//// Set Environment Variables
-	//os.Setenv("DBHOST", "localhost")
-	//os.Setenv("DBPORT", "5432")
-	//os.Setenv("DBUSER", "postgres")
-	//os.Setenv("DBPASSWORD", "postGres!")
-	//os.Setenv("DBNAME", "ticketdb")
-	//
-	//// Get the value of an Environment Variable
-	//fmt.Println(os.Getenv("HOST"))
-	//psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-	//	"password=%s dbname=%s sslmode=disable",
-	//	os.Getenv("DBHOST"), os.Getenv("DBPORT"), os.Getenv("DBUSER"), os.Getenv("DBPASSWORD"), os.Getenv("DBNAME"))
-
 	const (
 		host     = "localhost"
 		port     = 5432
